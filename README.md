@@ -21,6 +21,7 @@ Below, you can see the table which includes the result we are attempting to repr
 <p>
   
 ## Re-implementation Details
+We first re-implemented base REPLUG, before moving on to the LSR version. For base REPLUG, we must first retrieve documents using Facebook’s contriever. Every document in the external corpus is mapped to an embedding, which is then compared to the embedding of the context in question using the FAISS index for efficient vector similarity search. The top k documents whose embeddings are most similar to the context embedding are then retrieved, where we set k equal to 20.  
 ## Results and Analysis
 ## Conclusion and Future Work
 ## References
