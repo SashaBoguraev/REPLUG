@@ -22,6 +22,11 @@ Below, you can see the table which includes the result we are attempting to repr
   
 ## Re-implementation Details
 We first re-implemented base REPLUG, before moving on to the LSR version. For base REPLUG, we must first retrieve documents using Facebook’s contriever. Every document in the external corpus is mapped to an embedding, which is then compared to the embedding of the context in question using the FAISS index for efficient vector similarity search. The top k documents whose embeddings are most similar to the context embedding are then retrieved, where we set k equal to 20.  
+
+We aim to generate probabilities to choose what the next token in each context sequence should be. To do so, we adopt an ensemble method. Each of the 20 documents is prepended to the context separately and fed into GPT2, and the logits of each output are computed, to which the softmax function can be applied to obtain a probability distribution for the next token over the vocabulary size. We can then average over the probabilities to obtain the most probable token. Our metric for evaluation is Bits Per Byte, as described above, but our dataset is not the Pile dataset used in the paper, as this dataset has been taken down and is no longer accessible. Instead, we use the C4 dataset, chosen as an approximation of the diversity of documents included in the Pile. 
+
+After base REPLUG, we implement REPLUG LSR, which is our fine tuned model that utilizes a new loss function. This loss function aims to minimize the KL divergence between two distributions, the retrieval likelihood and the LM likelihood. The idea is that we wish for the documents we retrieve to be adept at improving the performance of GPT2. We then construct a training loop according to the specifications of the paper, which call for a temperature of 0.1 (used when computing the two likelihood distributions), a warmup ratio of 0.1, and a learning rate of 2e-5. Due to compute resource constraints, we change the batch size from 64 to 4 and the number of epochs from 25,000 to 20. 
+
 ## Results and Analysis
 ## Conclusion and Future Work
 ## References
