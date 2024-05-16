@@ -28,5 +28,9 @@ We aim to generate probabilities to choose what the next token in each context s
 After base REPLUG, we implement REPLUG LSR, which is our fine tuned model that utilizes a new loss function. This loss function aims to minimize the KL divergence between two distributions, the retrieval likelihood and the LM likelihood. The idea is that we wish for the documents we retrieve to be adept at improving the performance of GPT2. We then construct a training loop according to the specifications of the paper, which call for a temperature of 0.1 (used when computing the two likelihood distributions), a warmup ratio of 0.1, and a learning rate of 2e-5. Due to compute resource constraints, we change the batch size from 64 to 4 and the number of epochs from 25,000 to 20. 
 
 ## Results and Analysis
+
 ## Conclusion and Future Work
+
 ## References
+
+Shi, Weijia, et al. "Replug: Retrieval-augmented black-box language models." arXiv preprint arXiv:2301.12652 (2023).
