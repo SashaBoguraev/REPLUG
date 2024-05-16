@@ -42,6 +42,10 @@ The paper states:
 
 We follow all thse hyperparameters in our implementation.
 
+### Modifications
+
+Other than what is mentioned above, we are not aware of any other modifications we made.
+
 ## Results and Analysis
 
 ## Conclusion and Future Work
