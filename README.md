@@ -21,11 +21,26 @@ Below, you can see the table which includes the result we are attempting to repr
 <p>
   
 ## Re-implementation Details
-We first re-implemented base REPLUG, before moving on to the LSR version. For base REPLUG, we must first retrieve documents using Facebook’s contriever. Every document in the external corpus is mapped to an embedding, which is then compared to the embedding of the context in question using the FAISS index for efficient vector similarity search. The top k documents whose embeddings are most similar to the context embedding are then retrieved, where we set k equal to 20.  
 
-We aim to generate probabilities to choose what the next token in each context sequence should be. To do so, we adopt an ensemble method. Each of the 20 documents is prepended to the context separately and fed into GPT2, and the logits of each output are computed, to which the softmax function can be applied to obtain a probability distribution for the next token over the vocabulary size. We can then average over the probabilities to obtain the most probable token. Our metric for evaluation is Bits Per Byte, as described above, but our dataset is not the Pile dataset used in the paper, as this dataset has been taken down and is no longer accessible. Instead, we use the C4 dataset, chosen as an approximation of the diversity of documents included in the Pile. 
+In order to reimplement this paper, we aimed to reimplement the base REPLUG, with a stretch goal of implementing REPLUG LSR. In the end, we managed to reimplement a small, working example of REPLUG, whilst not managing to implement REPLUG LSR due to computational and memory constraints. I will describe the implementation strategies of each in turn.
 
-After base REPLUG, we implement REPLUG LSR, which is our fine tuned model that utilizes a new loss function. This loss function aims to minimize the KL divergence between two distributions, the retrieval likelihood and the LM likelihood. The idea is that we wish for the documents we retrieve to be adept at improving the performance of GPT2. We then construct a training loop according to the specifications of the paper, which call for a temperature of 0.1 (used when computing the two likelihood distributions), a warmup ratio of 0.1, and a learning rate of 2e-5. Due to compute resource constraints, we change the batch size from 64 to 4 and the number of epochs from 25,000 to 20. 
+### REPLUG
+
+To reimplement REPLUG, we must first have a retriever model (and tokenizer) as well as a LLM (and tokenizer). Following from the paper, we use [Facebook's Contriever](https://huggingface.co/facebook/contriever) and (GPT2)[https://huggingface.co/openai-community/gpt2]. Furthermore, we must have data. As mentioned in our `data/README.md`, the original data used was from [The Pile](https://pile.eleuther.ai/), however this has been taken down due to copyright, and we utilized [AllenAI's C4 dataset](https://huggingface.co/datasets/allenai/c4). The instructions on how we got this data can be found in `data/README.md`, as well as our modifications from the original data accessing in the paper -- in short, we samples much less data than the paper due to Colab's memory constraints.
+
+One we have our data and models, we can start implementing our paper. To impelment the base REPLUG, we use [Facebook AI's Similarity Search (FAISS)](https://arxiv.org/abs/1702.08734) to hold our datastore. As such, we create our embeddings for our datastore utilizing the Contriever model before constructing a FAISS datastore using these embeddings. This allows us very fast retrieval during that step of our pipeline. Once we have our datastore, we can build our pipeline by writing funcitons that allow us to retrieve context given a query, append that context to our query, feed it to GPT2, and then ensemble the results. We do this, with the same specifications as the paper, with the only limitation being the amount and type of data in our datastore.
+
+### REPLUG LSR 
+
+In order to reimplement REPLUG LSR, we develop functions that compute both the retrievel liklihood of our documents, as well as the LM liklihood of generation. With these, we can calculate the KL divergence between them, trying to minimize the distance between them, and average this value across our batch to get our loss. Our training loop then follows the specified training in the paper, where we update the retrievers model weights by backpropogating this loss. Further, we recompute the datastore every _T_ steps, as specified by the paper, to ensure that our datastore and retriever are still in tandem.
+
+### Hyper-Parameters
+
+The paper states:
+
+> " Given a query x, we retrieve the top 20 documents from the FAISS index and compute the retrieval likelihood and the LM likelihood with a temperature of 0.1. We train the retriever using the Adam optimizer (Kingma & Ba, 2015) with a learning rate of 2e-5, a batch size of 64, and a warmup ratio of 0.1. We re-compute the document embeddings every 3k steps and fine-tune the retriever for a total of 25k steps."
+
+We follow all thse hyperparameters in our implementation.
 
 ## Results and Analysis
 
@@ -34,3 +49,5 @@ After base REPLUG, we implement REPLUG LSR, which is our fine tuned model that u
 ## References
 
 Shi, Weijia, et al. "Replug: Retrieval-augmented black-box language models." arXiv preprint arXiv:2301.12652 (2023).
+
+Johnson, Jeff, Matthijs Douze, and Hervé Jégou. "Billion-scale similarity search with GPUs." IEEE Transactions on Big Data 7.3 (2019): 535-547.
