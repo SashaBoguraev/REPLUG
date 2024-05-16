@@ -56,6 +56,8 @@ We believe that while our work doesn't show anything wrong with the original pap
 
 ## Conclusion and Future Work
 
+In conclusion, we see the promise of non-parametric LM architectures, such as REPLUG. From the paper's description, they seem like very capable and useful methods to reduce hallucinations and add information not included in the LM's original training corpus. However, we also note that many of the paper's results are difficult, if not impossible, to reproduce without large amounts of computational resources. As such, we think future work should go into making these architectures much more resource efficient, able to run even on small scale examples.
+
 ## References
 
 Shi, Weijia, et al. "Replug: Retrieval-augmented black-box language models." arXiv preprint arXiv:2301.12652 (2023).
