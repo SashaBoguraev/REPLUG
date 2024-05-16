@@ -48,6 +48,12 @@ Other than what is mentioned above, we are not aware of any other modifications 
 
 ## Results and Analysis
 
+When we reimplement our results, we find that the base GPT2 XL has a BPB of 1.17, with GPT + REPLUG having a BPB of 1.19. This is a 1.9% performance decrease, compared to the 6.0% performance increase we were trying to replicate. We hypothesize that this is likley due to the size of our datastore. In the original paper, there were 36M documents in the datasdtore, which should allow for most of the sequences being tested to have their contexts in the datastore. As such, the model should be able to retrieve this context, and generate tokens with **more confidence**. In comparison, our datastore is very small. As such, many of the test sequences **may not** have their contexts in our datastore, leading to the retrieval of irrelevant context, confusing the model more and lowering confidence.
+
+Furthermore, we were unable to fine-tune our model. This is down to Colab's GPU memory constraints limiting us from being able to train the model. We tried many things to fix this, icnlduing attempting the use of different retrieval models, but we were unable to overcome this issue with our computational resources.
+
+We believe that while our work doesn't show anything wrong with the original paper, we do note that our results show the difficulty in making this model architecture applicable to individuals or organizations who do not have a massively large amount of compute. This architecture is still valuable, but we believe our results show it perhaps not as useful nor commercially viable as classic RAG architectures.
+
 ## Conclusion and Future Work
 
 ## References
@@ -55,3 +61,9 @@ Other than what is mentioned above, we are not aware of any other modifications 
 Shi, Weijia, et al. "Replug: Retrieval-augmented black-box language models." arXiv preprint arXiv:2301.12652 (2023).
 
 Johnson, Jeff, Matthijs Douze, and Hervé Jégou. "Billion-scale similarity search with GPUs." IEEE Transactions on Big Data 7.3 (2019): 535-547.
+
+Gao, Leo, et al. "The pile: An 800gb dataset of diverse text for language modeling." arXiv preprint arXiv:2101.00027 (2020).
+
+Izacard, Gautier, et al. "Unsupervised dense information retrieval with contrastive learning." arXiv preprint arXiv:2112.09118 (2021).
+
+Radford, Alec, et al. "Language models are unsupervised multitask learners." OpenAI blog 1.8 (2019): 9.
